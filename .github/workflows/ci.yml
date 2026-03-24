@@ -19,9 +19,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run tests
-        run: |
-          pytest tests/
+      - name: Lance les tests
+        run: python -m pytest -v --cov=app
         
       - name: Logn to Docker Hub
         uses: docker/login-action@v2
