@@ -2,34 +2,36 @@ name: CI
 on:
   push:
     branches: [main]
+
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Installer python
-        uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.10"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+      - name: Installer dependances
+        run: pip install -r requirements.txt
 
-      - name: Lance les tests
-        run: python -m pytest -v --cov=app
-        
+      - name: Lancer tests
+        run: PYTHONPATH=. pytest
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: Logn to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker image 
+      - name: Build Docker image
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/project:v2 .
-
-      - name: Push Docker image to Docker Hub
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/project:v2
